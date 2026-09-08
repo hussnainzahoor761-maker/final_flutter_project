@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_final_project/Screens/Onboarding_Scrrens/loginpage.dart';
+import 'package:flutter_final_project/screens/Onboarding_Scrrens/loginpage.dart';
 
 class Mainsliderscreen extends StatefulWidget {
   const new({super.key});

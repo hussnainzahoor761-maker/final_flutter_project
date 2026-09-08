@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_final_project/Screens/Onboarding_Scrrens/splashScreen.dart';
+import 'package:flutter_final_project/screens/Homepage/homev1.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: MyWidget(),
+      home: Homev1(),
     );
   }
 }
