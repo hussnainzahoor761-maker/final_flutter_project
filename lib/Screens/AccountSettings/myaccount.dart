@@ -1,7 +1,8 @@
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_final_project/Screens/myproperties/add_property.dart';
+import 'package:flutter_final_project/Screens/myproperties/myproperty.dart';
 import 'package:flutter_final_project/screens/AccountSettings/aboutapp.dart';
 import 'package:flutter_final_project/screens/AccountSettings/accountsecurity.dart';
 import 'package:flutter_final_project/screens/AccountSettings/helpcenter.dart';
@@ -10,6 +11,9 @@ import 'package:flutter_final_project/screens/AccountSettings/notifications.dart
 import 'package:flutter_final_project/screens/AccountSettings/paymentaccount.dart';
 import 'package:flutter_final_project/screens/AccountSettings/privacyandpolicy.dart';
 import 'package:flutter_final_project/screens/AccountSettings/termsandcondition.dart';
+import 'package:flutter_final_project/models/user_profile_model.dart';
+import 'package:flutter_final_project/network/apiservices.dart';
+import 'package:flutter_final_project/network/networkclient.dart';
 
 import 'personaldata.dart';
 
@@ -26,8 +30,34 @@ class _MyaccountState extends State<Myaccount> {
   // Selected profile image tracks either local file path or network/asset
   String? currentProfileImagePath;
   String currentProfileImageUrl = 'assets/images/profile.png';
+  UserProfileResponse? _profile;
+  final ApiServices _api = ApiServices(NetworkClient());
 
   static const Color primaryGreen = Color(0xFF2ECC71);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final response = await _api.currentUser();
+      if (!mounted || response.statusCode != 200) return;
+      final data = response.data;
+      if (data is Map<String, dynamic>) {
+        setState(() {
+          _profile = UserProfileResponse.fromJson(data);
+          if (_profile?.avatarUrl?.isNotEmpty == true) {
+            currentProfileImageUrl = _profile!.avatarUrl!;
+          }
+        });
+      }
+    } catch (_) {
+      // Keep the existing local profile fallback when the request fails.
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +132,18 @@ class _MyaccountState extends State<Myaccount> {
                     builder: (context) {
                       return Accountsecurity();
                     },
+                  ),
+                );
+              },
+            ),
+            _buildTile(
+              icon: Icons.credit_card_outlined,
+              title: 'My Properties',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => MyPropertity(apiServices: _api),
                   ),
                 );
               },
@@ -229,14 +271,14 @@ class _MyaccountState extends State<Myaccount> {
         const SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Text(
-              'Aaron Ramsdale',
+              _profile?.fullName ?? _profile?.firstName ?? 'Your profile',
               style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 2),
             Text(
-              'aaronramsdale@gmail.com',
+              _profile?.email ?? '',
               style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ],

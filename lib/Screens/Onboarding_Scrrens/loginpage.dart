@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_final_project/screens/uthentication/loginemptypage.dart';
+import 'package:flutter_final_project/Screens/uthentication/loginemptypage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class loginpage extends StatefulWidget {

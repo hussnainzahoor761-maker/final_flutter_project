@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_final_project/errors/exception.dart';
+import 'package:flutter_final_project/network/session.dart';
 import 'package:flutter_final_project/utils/constants.dart';
 
 class NetworkClient {
@@ -20,14 +21,44 @@ class NetworkClient {
     _dio = Dio(baseOptions);
 
     _dio.interceptors.add(
-      LogInterceptor(request: true, responseBody: true, error: true),
+      LogInterceptor(
+        request: true,
+        responseBody: true,
+        error: true,
+        requestBody: true,
+      ),
     );
+  }
+
+  Future<Response> postMultipart(
+    String url,
+    FormData data, {
+    String? token,
+  }) async {
+    try {
+      final requestToken = token ?? Session.instance.accessToken;
+      return await _dio.post(
+        url,
+        data: data,
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+            if (requestToken != null) 'Authorization': 'Bearer $requestToken',
+          },
+          responseType: ResponseType.json,
+          validateStatus: (_) => true,
+        ),
+      );
+    } on DioException catch (e) {
+      throw RemoteException(e);
+    }
   }
 
   Future<Response> post(
     String url,
     Map<String, dynamic> params, {
     String? token,
+    Map<String, dynamic>? queryParameters,
   }) async {
     Response respone;
 
@@ -40,6 +71,7 @@ class NetworkClient {
       respone = await _dio.post(
         url,
         data: params,
+        queryParameters: queryParameters,
         options: Options(
           headers: map,
           responseType: ResponseType.json,
@@ -102,6 +134,30 @@ class NetworkClient {
       throw RemoteException(e);
     }
     return respone;
+  }
+
+  Future<Response> patch(
+    String url,
+    Map<String, dynamic> params, {
+    String? token,
+  }) async {
+    try {
+      final headers = <String, dynamic>{"Accept": "application/json"};
+      if (token != null) {
+        headers["Authorization"] = "Bearer $token";
+      }
+      return await _dio.patch(
+        url,
+        data: params,
+        options: Options(
+          headers: headers,
+          responseType: ResponseType.json,
+          validateStatus: (_) => true,
+        ),
+      );
+    } on DioException catch (e) {
+      throw RemoteException(e);
+    }
   }
 
   Future<Response> delete(
